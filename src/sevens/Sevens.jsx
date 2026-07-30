@@ -453,7 +453,8 @@ function Sevens({
       ROUND_NUMBER_STORAGE_KEY,
     );
 
-    navigate("/");
+    window.location.href =
+      "https://manosaba-cardgame-hub.vercel.app/";
   };
 
   const {
