@@ -84,7 +84,7 @@ export default function useCardAnimation({
                     flyingCardId,
                 ),
             );
-          }, 80);
+          }, 500);
         });
       });
     }, 720);
@@ -239,7 +239,7 @@ export default function useCardAnimation({
                     burstId,
                 ),
             );
-          }, 80);
+          }, 500);
         });
       });
 
