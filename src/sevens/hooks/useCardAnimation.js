@@ -57,6 +57,7 @@ export default function useCardAnimation({
         ownerIndex,
         targetLeft: targetCenter.left,
         targetTop: targetCenter.top,
+        settled: false,
       },
     ]);
 
@@ -69,12 +70,33 @@ export default function useCardAnimation({
       /*
         Reactとブラウザに盤面を描画させるため、
         2フレーム待つ。
-
-        さらに80msだけ飛行カードを残し、
-        盤面カードが表示されるまで上から覆う。
       */
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
+          /*
+            飛行処理はここで終了扱いにする。
+
+            カードの表示自体は消さず、
+            着地点に静止させたまま残す。
+          */
+          setFlyingCards(
+            (currentFlyingCards) =>
+              currentFlyingCards.map(
+                (flyingCard) =>
+                  flyingCard.id ===
+                  flyingCardId
+                    ? {
+                        ...flyingCard,
+                        settled: true,
+                      }
+                    : flyingCard,
+              ),
+          );
+
+          /*
+            着地点で500ms静止させてから、
+            表示用の飛行カードを削除する。
+          */
           window.setTimeout(() => {
             setFlyingCards(
               (currentFlyingCards) =>
@@ -140,6 +162,7 @@ export default function useCardAnimation({
           ownerIndex: playerIndex,
           targetLeft: targetCenter.left,
           targetTop: targetCenter.top,
+          settled: false,
         };
       })
       .filter(Boolean);
@@ -225,11 +248,35 @@ export default function useCardAnimation({
       });
 
       /*
-        盤面側のカードを描画させてから、
-        さらに80msだけ飛行カードを残す。
+        Reactとブラウザに盤面を描画させるため、
+        2フレーム待つ。
       */
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
+          /*
+            バーストの飛行処理は
+            ここで終了扱いにする。
+
+            カードの表示は着地点に残す。
+          */
+          setFlyingCards(
+            (currentFlyingCards) =>
+              currentFlyingCards.map(
+                (flyingCard) =>
+                  flyingCard.burstId ===
+                  burstId
+                    ? {
+                        ...flyingCard,
+                        settled: true,
+                      }
+                    : flyingCard,
+              ),
+          );
+
+          /*
+            着地点で500ms静止させてから、
+            バーストの飛行カードを削除する。
+          */
           window.setTimeout(() => {
             setFlyingCards(
               (currentFlyingCards) =>
