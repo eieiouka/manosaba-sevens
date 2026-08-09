@@ -57,6 +57,10 @@ export default function useCardAnimation({
         ownerIndex,
         targetLeft: targetCenter.left,
         targetTop: targetCenter.top,
+        targetWidth:
+          targetElement.offsetWidth,
+        targetHeight:
+          targetElement.offsetHeight,
         settled: false,
       },
     ]);
@@ -162,6 +166,10 @@ export default function useCardAnimation({
           ownerIndex: playerIndex,
           targetLeft: targetCenter.left,
           targetTop: targetCenter.top,
+          targetWidth:
+            targetElement.offsetWidth,
+          targetHeight:
+            targetElement.offsetHeight,
           settled: false,
         };
       })
