@@ -43,9 +43,9 @@ function getCardImagePath(suit, rank) {
     return "";
   }
 
-  return `/cards/card_${getRankFileName(
+  return `/cards_webp/card_${getRankFileName(
     rank,
-  )}${suitFileNumber}.png`;
+  )}${suitFileNumber}.webp`;
 }
 
 const FlyingCard = memo(function FlyingCard({
