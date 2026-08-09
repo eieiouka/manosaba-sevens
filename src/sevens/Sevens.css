@@ -911,10 +911,14 @@ body,
   animation: none;
 
   transform:
-    translate3d(0, 0, 0)
+    translate3d(
+      var(--settled-correction-x, 0px),
+      var(--settled-correction-y, 0px),
+      0
+    )
     translate3d(-50%, -50%, 0)
     rotate(0deg)
-    scale(0.8);
+    scale(1);
 
   will-change: transform, opacity;
 
@@ -928,6 +932,24 @@ body,
     openingSevenFlight 700ms
     cubic-bezier(0.2, 0.7, 0.25, 1)
     forwards;
+}
+
+/*
+  着地後はアニメーションの移動量を使わず、
+  盤面スロットの中心座標へ直接固定する。
+*/
+.openingFlyingCard.settledFlyingCard {
+  left: var(--settled-left);
+  top: var(--settled-top);
+
+  opacity: 1;
+
+  animation: none;
+
+  transform:
+    translate3d(-50%, -50%, 0)
+    rotate(0deg)
+    scale(1);
 }
 
 .flyingCardImage {

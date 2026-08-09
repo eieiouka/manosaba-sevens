@@ -62,6 +62,79 @@ const FlyingCard = memo(function FlyingCard({
     }
 
     /*
+      着地後は、飛行カードと盤面カードの
+      実際の描画位置を比較して補正する。
+    */
+    if (flyingCard.settled) {
+      const tableElement =
+        cardElement.closest(
+          ".sevensTable",
+        );
+
+      const targetElement =
+        tableElement?.querySelector(
+          `[data-board-suit="${flyingCard.suit}"][data-board-rank="${flyingCard.rank}"]`,
+        );
+
+      if (
+        !tableElement ||
+        !targetElement
+      ) {
+        return;
+      }
+
+      const tableRect =
+        tableElement.getBoundingClientRect();
+
+      const targetRect =
+        targetElement.getBoundingClientRect();
+
+      const cardRect =
+        cardElement.getBoundingClientRect();
+
+      /*
+        PC版ではゲーム画面全体が
+        transform: scale(...)される。
+
+        画面上の差を、
+        CSS内部の座標へ戻す。
+      */
+      const scaleX =
+        tableElement.offsetWidth > 0
+          ? tableRect.width /
+            tableElement.offsetWidth
+          : 1;
+
+      const scaleY =
+        tableElement.offsetHeight > 0
+          ? tableRect.height /
+            tableElement.offsetHeight
+          : 1;
+
+      const correctionX =
+        (targetRect.left -
+          cardRect.left) /
+        scaleX;
+
+      const correctionY =
+        (targetRect.top -
+          cardRect.top) /
+        scaleY;
+
+      cardElement.style.setProperty(
+        "--settled-correction-x",
+        `${correctionX}px`,
+      );
+
+      cardElement.style.setProperty(
+        "--settled-correction-y",
+        `${correctionY}px`,
+      );
+
+      return;
+    }
+
+    /*
       CSSの50%などが実際に何pxになったかを、
       ブラウザに計算させてから取得する。
     */
@@ -72,10 +145,12 @@ const FlyingCard = memo(function FlyingCard({
       cardElement.offsetTop;
 
     const moveX =
-      flyingCard.targetLeft - startLeft;
+      flyingCard.targetLeft -
+      startLeft;
 
     const moveY =
-      flyingCard.targetTop - startTop;
+      flyingCard.targetTop -
+      startTop;
 
     cardElement.style.setProperty(
       "--opening-move-x",
@@ -95,14 +170,26 @@ const FlyingCard = memo(function FlyingCard({
       "openingFlyingCardReady",
     );
   }, [
+    flyingCard.suit,
+    flyingCard.rank,
     flyingCard.targetLeft,
     flyingCard.targetTop,
+    flyingCard.settled,
   ]);
+
+  const className = [
+    "openingFlyingCard",
+    flyingCard.settled
+      ? "settledFlyingCard"
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
       ref={cardRef}
-      className="openingFlyingCard"
+      className={className}
       style={{
         "--opening-start-left":
           sourcePosition?.left ?? "50%",
@@ -110,11 +197,48 @@ const FlyingCard = memo(function FlyingCard({
         "--opening-start-top":
           sourcePosition?.top ?? "50%",
 
+        /*
+          飛行カードのサイズを、
+          盤面スロットの実寸へ合わせる。
+        */
         "--flying-card-width":
-          `${flyingCard.targetWidth ?? 92}px`,
+          `${
+            flyingCard.targetWidth ??
+            92
+          }px`,
 
         "--flying-card-height":
-          `${flyingCard.targetHeight ?? 138}px`,
+          `${
+            flyingCard.targetHeight ??
+            138
+          }px`,
+
+        /*
+          着地後は盤面スロットの
+          中心座標へ直接置く。
+        */
+        "--settled-left":
+          `${
+            flyingCard.targetLeft
+          }px`,
+
+        "--settled-top":
+          `${
+            flyingCard.targetTop
+          }px`,
+
+        /*
+          実際に描画された盤面カードとの
+          差分を入れる。
+
+          初回描画時は0pxで、
+          useLayoutEffectで正確な値へ更新する。
+        */
+        "--settled-correction-x":
+          "0px",
+
+        "--settled-correction-y":
+          "0px",
       }}
     >
       <img
@@ -137,20 +261,24 @@ function FlyingCards({
 }) {
   return (
     <>
-      {flyingCards.map((flyingCard) => {
-        const sourcePosition =
-          openingSourcePositions[
-            flyingCard.ownerIndex
-          ];
+      {flyingCards.map(
+        (flyingCard) => {
+          const sourcePosition =
+            openingSourcePositions[
+              flyingCard.ownerIndex
+            ];
 
-        return (
-          <FlyingCard
-            key={flyingCard.id}
-            flyingCard={flyingCard}
-            sourcePosition={sourcePosition}
-          />
-        );
-      })}
+          return (
+            <FlyingCard
+              key={flyingCard.id}
+              flyingCard={flyingCard}
+              sourcePosition={
+                sourcePosition
+              }
+            />
+          );
+        },
+      )}
     </>
   );
 }
