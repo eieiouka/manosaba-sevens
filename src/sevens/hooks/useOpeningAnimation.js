@@ -70,7 +70,7 @@ export default function useOpeningAnimation({
       着地した飛行カードを、
       その場に表示しておく時間。
     */
-    const landingHoldDuration = 5000;
+    const landingHoldDuration = 500;
 
     orderedSevens.forEach(
       (card, index) => {
