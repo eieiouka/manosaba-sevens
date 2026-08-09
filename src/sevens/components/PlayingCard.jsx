@@ -42,7 +42,7 @@ function getCardImagePath(suitId, rank) {
     return "";
   }
 
-  return `/cards/card_${getRankFileName(rank)}${suit.fileNumber}.png`;
+  return `/card_webp/card_${getRankFileName(rank)}${suit.fileNumber}.webp`;
 }
 
 function getRankLabel(rank) {
