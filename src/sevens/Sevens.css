@@ -887,15 +887,8 @@ body,
   left: var(--opening-start-left);
   top: var(--opening-start-top);
 
-  /*
-    JSXから盤面スロットの実寸を受け取る。
-    値がない場合だけ従来サイズを使う。
-  */
-  width:
-    var(--flying-card-width, 92px);
-
-  height:
-    var(--flying-card-height, 138px);
+  width: 92px;
+  aspect-ratio: 2 / 3;
 
   opacity: 0;
 
@@ -3184,5 +3177,10 @@ body,
     font-size: clamp(14px, 4.2vw, 18px);
     line-height: 1.1;
     white-space: nowrap;
+  }
+
+  /* 飛行カードも画面幅に比例 */
+  .openingFlyingCard {
+    width: 6.3cqw;
   }
 }
