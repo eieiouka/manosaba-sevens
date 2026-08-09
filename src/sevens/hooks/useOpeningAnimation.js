@@ -23,7 +23,10 @@ export default function useOpeningAnimation({
       !openingSevens ||
       openingSevens.length === 0
     ) {
-      setCurrentPlayerIndex(firstPlayerIndex);
+      setCurrentPlayerIndex(
+        firstPlayerIndex,
+      );
+
       setOpeningDone(true);
 
       return undefined;
@@ -53,174 +56,193 @@ export default function useOpeningAnimation({
     */
     const openingStartDelay = 800;
 
+    /*
+      7は600ms間隔で順番に出す。
+
+      CSSの飛行アニメーションを
+      500msにしたため、JS側も
+      500msで着地扱いにする。
+    */
     const launchInterval = 600;
-    const flightDuration = 600;
+    const flightDuration = 500;
 
-    orderedSevens.forEach((card, index) => {
-      const launchDelay =
-        openingStartDelay +
-        index * launchInterval;
+    orderedSevens.forEach(
+      (card, index) => {
+        const launchDelay =
+          openingStartDelay +
+          index * launchInterval;
 
-      const landingDelay =
-        launchDelay + flightDuration;
+        const landingDelay =
+          launchDelay +
+          flightDuration;
 
-      const launchTimer = window.setTimeout(
-        () => {
-          if (cancelled) {
-            return;
-          }
+        const flyingCardId =
+          `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
 
-          const tableElement =
-            tableRef.current;
-
-          const targetElement =
-            tableElement?.querySelector(
-              `[data-board-suit="${card.suit}"][data-board-rank="7"]`,
-            );
-
-          if (
-            !tableElement ||
-            !targetElement
-          ) {
-            return;
-          }
-
-          const targetCenter =
-            getElementCenterRelative(
-              targetElement,
-              tableElement,
-            );
-
-          if (!targetCenter) {
-            return;
-          }
-
-          /*
-            7を飛ばし始める前に、
-            所有者の手札から7を削除する。
-          */
-          if (card.ownerIndex === 0) {
-            setHand((currentHand) =>
-              currentHand.filter(
-                (handCard) =>
-                  handCard.suit !==
-                    card.suit ||
-                  handCard.rank !== 7,
-              ),
-            );
-          } else {
-            const cpuIndex =
-              card.ownerIndex - 1;
-
-            setCpuHands(
-              (currentCpuHands) =>
-                currentCpuHands.map(
-                  (
-                    cpuHand,
-                    currentCpuIndex,
-                  ) => {
-                    if (
-                      currentCpuIndex !==
-                      cpuIndex
-                    ) {
-                      return cpuHand;
-                    }
-
-                    return cpuHand.filter(
-                      (handCard) =>
-                        handCard.suit !==
-                          card.suit ||
-                        handCard.rank !==
-                          7,
-                    );
-                  },
-                ),
-            );
-          }
-
-          const flyingCardId =
-            `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
-
-          playCardPlaySound();
-
-          setFlyingCards(
-            (currentFlyingCards) => [
-              ...currentFlyingCards,
-              {
-                ...card,
-                id: flyingCardId,
-                targetLeft:
-                  targetCenter.left,
-                targetTop:
-                  targetCenter.top,
-              },
-            ],
-          );
-        },
-        launchDelay,
-      );
-
-      const landingTimer =
-        window.setTimeout(() => {
-          if (cancelled) {
-            return;
-          }
-
-          setBoard((currentBoard) => {
-            if (
-              currentBoard[
-                card.suit
-              ]?.includes(7)
-            ) {
-              return currentBoard;
+        const launchTimer =
+          window.setTimeout(() => {
+            if (cancelled) {
+              return;
             }
 
-            return {
-              ...currentBoard,
-              [card.suit]: [
-                ...currentBoard[
-                  card.suit
-                ],
-                7,
-              ],
-            };
-          });
+            const tableElement =
+              tableRef.current;
 
-          const flyingCardId =
-            `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
-
-          window.requestAnimationFrame(
-            () => {
-              window.requestAnimationFrame(
-                () => {
-                  setFlyingCards(
-                    (
-                      currentFlyingCards,
-                    ) =>
-                      currentFlyingCards.filter(
-                        (
-                          flyingCard,
-                        ) =>
-                          flyingCard.id !==
-                          flyingCardId,
-                      ),
-                  );
-                },
+            const targetElement =
+              tableElement?.querySelector(
+                `[data-board-suit="${card.suit}"][data-board-rank="7"]`,
               );
-            },
-          );
-        }, landingDelay);
 
-      timers.push(
-        launchTimer,
-        landingTimer,
-      );
-    });
+            if (
+              !tableElement ||
+              !targetElement
+            ) {
+              return;
+            }
 
+            const targetCenter =
+              getElementCenterRelative(
+                targetElement,
+                tableElement,
+              );
+
+            if (!targetCenter) {
+              return;
+            }
+
+            /*
+              7を飛ばし始める前に、
+              所有者の手札から7を削除する。
+            */
+            if (card.ownerIndex === 0) {
+              setHand((currentHand) =>
+                currentHand.filter(
+                  (handCard) =>
+                    handCard.suit !==
+                      card.suit ||
+                    handCard.rank !== 7,
+                ),
+              );
+            } else {
+              const cpuIndex =
+                card.ownerIndex - 1;
+
+              setCpuHands(
+                (currentCpuHands) =>
+                  currentCpuHands.map(
+                    (
+                      cpuHand,
+                      currentCpuIndex,
+                    ) => {
+                      if (
+                        currentCpuIndex !==
+                        cpuIndex
+                      ) {
+                        return cpuHand;
+                      }
+
+                      return cpuHand.filter(
+                        (handCard) =>
+                          handCard.suit !==
+                            card.suit ||
+                          handCard.rank !==
+                            7,
+                      );
+                    },
+                  ),
+              );
+            }
+
+            playCardPlaySound();
+
+            setFlyingCards(
+              (currentFlyingCards) => [
+                ...currentFlyingCards,
+                {
+                  ...card,
+                  id: flyingCardId,
+                  targetLeft:
+                    targetCenter.left,
+                  targetTop:
+                    targetCenter.top,
+                },
+              ],
+            );
+          }, launchDelay);
+
+        const landingTimer =
+          window.setTimeout(() => {
+            if (cancelled) {
+              return;
+            }
+
+            /*
+              飛行カードを消す前に、
+              盤面へ7を追加する。
+            */
+            setBoard((currentBoard) => {
+              if (
+                currentBoard[
+                  card.suit
+                ]?.includes(7)
+              ) {
+                return currentBoard;
+              }
+
+              return {
+                ...currentBoard,
+                [card.suit]: [
+                  ...currentBoard[
+                    card.suit
+                  ],
+                  7,
+                ],
+              };
+            });
+
+            /*
+              盤面側の7が描画されるまで
+              2フレーム待ってから、
+              飛行カードを削除する。
+            */
+            window.requestAnimationFrame(
+              () => {
+                window.requestAnimationFrame(
+                  () => {
+                    setFlyingCards(
+                      (
+                        currentFlyingCards,
+                      ) =>
+                        currentFlyingCards.filter(
+                          (
+                            flyingCard,
+                          ) =>
+                            flyingCard.id !==
+                            flyingCardId,
+                        ),
+                    );
+                  },
+                );
+              },
+            );
+          }, landingDelay);
+
+        timers.push(
+          launchTimer,
+          landingTimer,
+        );
+      },
+    );
+
+    /*
+      最後の7が着地してから100ms後に、
+      通常のゲーム進行を開始する。
+    */
     const finishDelay =
       openingStartDelay +
-      orderedSevens.length *
+      (orderedSevens.length - 1) *
         launchInterval +
+      flightDuration +
       100;
 
     const finishTimer =
