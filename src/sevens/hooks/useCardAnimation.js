@@ -63,19 +63,28 @@ export default function useCardAnimation({
     window.setTimeout(() => {
       /*
         先に盤面へカードを追加する。
-        盤面側のカードが描画されてから、
-        飛行カードを削除する。
       */
       onLanding();
 
+      /*
+        Reactとブラウザに盤面を描画させるため、
+        2フレーム待つ。
+
+        さらに80msだけ飛行カードを残し、
+        盤面カードが表示されるまで上から覆う。
+      */
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          setFlyingCards((currentFlyingCards) =>
-            currentFlyingCards.filter(
-              (flyingCard) =>
-                flyingCard.id !== flyingCardId,
-            ),
-          );
+          window.setTimeout(() => {
+            setFlyingCards(
+              (currentFlyingCards) =>
+                currentFlyingCards.filter(
+                  (flyingCard) =>
+                    flyingCard.id !==
+                    flyingCardId,
+                ),
+            );
+          }, 80);
         });
       });
     }, 720);
@@ -135,7 +144,10 @@ export default function useCardAnimation({
       })
       .filter(Boolean);
 
-    // 飛行開始前に手札をすべて消す
+    /*
+      飛行開始前に、
+      バーストしたプレイヤーの手札を消す。
+    */
     if (playerIndex === 0) {
       setHand([]);
       setSelectedCard(null);
@@ -145,7 +157,9 @@ export default function useCardAnimation({
       setCpuHands((currentCpuHands) =>
         currentCpuHands.map(
           (cpuHand, index) =>
-            index === cpuIndex ? [] : cpuHand,
+            index === cpuIndex
+              ? []
+              : cpuHand,
         ),
       );
     }
@@ -167,49 +181,74 @@ export default function useCardAnimation({
 
     window.setTimeout(() => {
       /*
-        バーストした全カードを盤面へ追加する。
+        バーストした全カードを
+        先に盤面へ追加する。
       */
       setBoard((currentBoard) => {
         const nextBoard = {
-          spades: [...currentBoard.spades],
-          hearts: [...currentBoard.hearts],
-          diamonds: [...currentBoard.diamonds],
-          clubs: [...currentBoard.clubs],
+          spades: [
+            ...currentBoard.spades,
+          ],
+          hearts: [
+            ...currentBoard.hearts,
+          ],
+          diamonds: [
+            ...currentBoard.diamonds,
+          ],
+          clubs: [
+            ...currentBoard.clubs,
+          ],
         };
 
         cards.forEach((card) => {
           if (
-            !nextBoard[card.suit].includes(card.rank)
+            !nextBoard[card.suit].includes(
+              card.rank,
+            )
           ) {
-            nextBoard[card.suit].push(card.rank);
+            nextBoard[card.suit].push(
+              card.rank,
+            );
           }
         });
 
-        Object.keys(nextBoard).forEach((suit) => {
-          nextBoard[suit].sort(
-            (rankA, rankB) => rankA - rankB,
-          );
-        });
+        Object.keys(nextBoard).forEach(
+          (suit) => {
+            nextBoard[suit].sort(
+              (rankA, rankB) =>
+                rankA - rankB,
+            );
+          },
+        );
 
         return nextBoard;
       });
 
       /*
-        盤面側のカードが描画されてから、
-        バーストの飛行カードを削除する。
+        盤面側のカードを描画させてから、
+        さらに80msだけ飛行カードを残す。
       */
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          setFlyingCards((currentFlyingCards) =>
-            currentFlyingCards.filter(
-              (flyingCard) =>
-                flyingCard.burstId !== burstId,
-            ),
-          );
+          window.setTimeout(() => {
+            setFlyingCards(
+              (currentFlyingCards) =>
+                currentFlyingCards.filter(
+                  (flyingCard) =>
+                    flyingCard.burstId !==
+                    burstId,
+                ),
+            );
+          }, 80);
         });
       });
 
-      const remainingPlayers = [0, 1, 2, 3].filter(
+      const remainingPlayers = [
+        0,
+        1,
+        2,
+        3,
+      ].filter(
         (playerIndexValue) =>
           !nextBurstPlayers.includes(
             playerIndexValue,
@@ -218,7 +257,9 @@ export default function useCardAnimation({
 
       if (remainingPlayers.length === 1) {
         setWinnerType("survived");
-        setWinnerIndex(remainingPlayers[0]);
+        setWinnerIndex(
+          remainingPlayers[0],
+        );
         return;
       }
 
