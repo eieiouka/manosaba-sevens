@@ -59,12 +59,18 @@ export default function useOpeningAnimation({
     /*
       7は600ms間隔で順番に出す。
 
-      CSSの飛行アニメーションを
-      500msにしたため、JS側も
-      500msで着地扱いにする。
+      CSSの飛行アニメーションは700ms。
+      20msの余裕を持たせて、
+      720ms後に着地扱いにする。
     */
     const launchInterval = 600;
     const flightDuration = 720;
+
+    /*
+      着地した飛行カードを、
+      その場に表示しておく時間。
+    */
+    const landingHoldDuration = 5000;
 
     orderedSevens.forEach(
       (card, index) => {
@@ -165,6 +171,7 @@ export default function useOpeningAnimation({
                     targetCenter.left,
                   targetTop:
                     targetCenter.top,
+                  settled: false,
                 },
               ],
             );
@@ -177,8 +184,8 @@ export default function useOpeningAnimation({
             }
 
             /*
-              飛行カードを消す前に、
-              盤面へ7を追加する。
+              飛行カードを残したまま、
+              先に盤面へ7を追加する。
             */
             setBoard((currentBoard) => {
               if (
@@ -201,26 +208,58 @@ export default function useOpeningAnimation({
             });
 
             /*
-              盤面側の7が描画されるまで
-              2フレーム待ってから、
-              飛行カードを削除する。
+              盤面側の7を描画させるため、
+              2フレーム待つ。
             */
             window.requestAnimationFrame(
               () => {
                 window.requestAnimationFrame(
                   () => {
+                    /*
+                      飛行処理は終了扱いにするが、
+                      表示は着地点に残す。
+                    */
                     setFlyingCards(
                       (
                         currentFlyingCards,
                       ) =>
-                        currentFlyingCards.filter(
+                        currentFlyingCards.map(
                           (
                             flyingCard,
                           ) =>
-                            flyingCard.id !==
-                            flyingCardId,
+                            flyingCard.id ===
+                            flyingCardId
+                              ? {
+                                  ...flyingCard,
+                                  settled:
+                                    true,
+                                }
+                              : flyingCard,
                         ),
                     );
+
+                    /*
+                      着地点で1秒静止してから、
+                      この7の飛行カードだけ削除する。
+
+                      openingDoneの変更後も削除処理を
+                      続ける必要があるため、
+                      このタイマーはtimersには入れない。
+                    */
+                    window.setTimeout(() => {
+                      setFlyingCards(
+                        (
+                          currentFlyingCards,
+                        ) =>
+                          currentFlyingCards.filter(
+                            (
+                              flyingCard,
+                            ) =>
+                              flyingCard.id !==
+                              flyingCardId,
+                          ),
+                      );
+                    }, landingHoldDuration);
                   },
                 );
               },
@@ -237,6 +276,9 @@ export default function useOpeningAnimation({
     /*
       最後の7が着地してから100ms後に、
       通常のゲーム進行を開始する。
+
+      着地した7はsettledになっているため、
+      表示が残っていても進行を止めない。
     */
     const finishDelay =
       openingStartDelay +
@@ -254,10 +296,17 @@ export default function useOpeningAnimation({
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(
             () => {
-              setFlyingCards([]);
+              /*
+                ここではflyingCardsを
+                空にしない。
+
+                各7は着地から1秒後に
+                個別に削除される。
+              */
               setCurrentPlayerIndex(
                 firstPlayerIndex,
               );
+
               setOpeningDone(true);
             },
           );
