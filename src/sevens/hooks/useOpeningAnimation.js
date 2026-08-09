@@ -64,7 +64,7 @@ export default function useOpeningAnimation({
       500msで着地扱いにする。
     */
     const launchInterval = 600;
-    const flightDuration = 600;
+    const flightDuration = 720;
 
     orderedSevens.forEach(
       (card, index) => {
