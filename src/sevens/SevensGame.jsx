@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -31,6 +32,48 @@ function SevensGame({ navigate }) {
 
   const [gameId, setGameId] =
     useState(0);
+
+  /*
+    七並べの画面を開いた時点で、
+    52枚のWebPカード画像を
+    バックグラウンドで先読みする。
+
+    読み込み完了は待たないので、
+    スタート画面の操作はそのまま可能。
+  */
+  useEffect(() => {
+    const ranks = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "T",
+      "J",
+      "Q",
+      "K",
+    ];
+
+    const suitNumbers = [
+      1,
+      2,
+      3,
+      4,
+    ];
+
+    for (const rank of ranks) {
+      for (const suitNumber of suitNumbers) {
+        const image = new Image();
+
+        image.src =
+          `/cards_webp/card_${rank}${suitNumber}.webp`;
+      }
+    }
+  }, []);
 
   /*
     SevensGameが存在している間、
