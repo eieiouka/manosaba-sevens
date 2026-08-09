@@ -210,6 +210,20 @@ function Sevens({
   const [flyingCards, setFlyingCards] =
     useState([]);
 
+  /*
+    settledになったカードは、着地点で表示だけを
+    続けているカードなので、ゲーム進行の待機判定から
+    除外する。
+  */
+  const activeFlyingCards = useMemo(
+    () =>
+      flyingCards.filter(
+        (flyingCard) =>
+          !flyingCard.settled,
+      ),
+    [flyingCards],
+  );
+
   const [burstPlayers, setBurstPlayers] =
     useState([]);
 
@@ -355,7 +369,7 @@ function Sevens({
     cpuHands,
     cpuPasses,
     winnerIndex,
-    flyingCards,
+    flyingCards: activeFlyingCards,
     burstPlayers,
     passPopupPlayerIndex,
     hand,
@@ -378,7 +392,7 @@ function Sevens({
   useBurstCheck({
     openingDone,
     winnerIndex,
-    flyingCards,
+    flyingCards: activeFlyingCards,
     passPopupPlayerIndex,
     currentPlayerIndex,
     burstPlayers,
@@ -470,7 +484,7 @@ function Sevens({
     selectedCard,
     passes,
     burstPlayers,
-    flyingCards,
+    flyingCards: activeFlyingCards,
     passPopupPlayerIndex,
     playerTurnCountRef,
     forcePlayerActionRef,
@@ -512,7 +526,7 @@ function Sevens({
       >
         <div
           className={`sevensGameCanvas ${
-            flyingCards.length > 0
+            activeFlyingCards.length > 0
               ? "cardAnimationRunning"
               : ""
           } ${
@@ -607,7 +621,9 @@ function Sevens({
                 currentPlayerIndex={
                   currentPlayerIndex
                 }
-                flyingCards={flyingCards}
+                flyingCards={
+                  activeFlyingCards
+                }
                 passPopupPlayerIndex={
                   passPopupPlayerIndex
                 }
