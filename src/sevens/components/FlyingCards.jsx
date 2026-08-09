@@ -57,80 +57,14 @@ const FlyingCard = memo(function FlyingCard({
   useLayoutEffect(() => {
     const cardElement = cardRef.current;
 
-    if (!cardElement) {
-      return;
-    }
-
     /*
-      着地後は、飛行カードと盤面カードの
-      実際の描画位置を比較して補正する。
+      着地後はアニメーション用の
+      移動量を使わない。
     */
-    if (flyingCard.settled) {
-      const tableElement =
-        cardElement.closest(
-          ".sevensTable",
-        );
-
-      const targetElement =
-        tableElement?.querySelector(
-          `[data-board-suit="${flyingCard.suit}"][data-board-rank="${flyingCard.rank}"]`,
-        );
-
-      if (
-        !tableElement ||
-        !targetElement
-      ) {
-        return;
-      }
-
-      const tableRect =
-        tableElement.getBoundingClientRect();
-
-      const targetRect =
-        targetElement.getBoundingClientRect();
-
-      const cardRect =
-        cardElement.getBoundingClientRect();
-
-      /*
-        PC版ではゲーム画面全体が
-        transform: scale(...)される。
-
-        画面上の差を、
-        CSS内部の座標へ戻す。
-      */
-      const scaleX =
-        tableElement.offsetWidth > 0
-          ? tableRect.width /
-            tableElement.offsetWidth
-          : 1;
-
-      const scaleY =
-        tableElement.offsetHeight > 0
-          ? tableRect.height /
-            tableElement.offsetHeight
-          : 1;
-
-      const correctionX =
-        (targetRect.left -
-          cardRect.left) /
-        scaleX;
-
-      const correctionY =
-        (targetRect.top -
-          cardRect.top) /
-        scaleY;
-
-      cardElement.style.setProperty(
-        "--settled-correction-x",
-        `${correctionX}px`,
-      );
-
-      cardElement.style.setProperty(
-        "--settled-correction-y",
-        `${correctionY}px`,
-      );
-
+    if (
+      !cardElement ||
+      flyingCard.settled
+    ) {
       return;
     }
 
@@ -170,12 +104,31 @@ const FlyingCard = memo(function FlyingCard({
       "openingFlyingCardReady",
     );
   }, [
-    flyingCard.suit,
-    flyingCard.rank,
     flyingCard.targetLeft,
     flyingCard.targetTop,
     flyingCard.settled,
   ]);
+
+  const targetWidth =
+    flyingCard.targetWidth ?? 92;
+
+  const targetHeight =
+    flyingCard.targetHeight ?? 138;
+
+  /*
+    targetLeft / targetTopは
+    盤面スロットの中心座標。
+
+    幅と高さの半分を引いて、
+    盤面スロットの左上座標へ変換する。
+  */
+  const settledLeft =
+    flyingCard.targetLeft -
+    targetWidth / 2;
+
+  const settledTop =
+    flyingCard.targetTop -
+    targetHeight / 2;
 
   const className = [
     "openingFlyingCard",
@@ -202,43 +155,20 @@ const FlyingCard = memo(function FlyingCard({
           盤面スロットの実寸へ合わせる。
         */
         "--flying-card-width":
-          `${
-            flyingCard.targetWidth ??
-            92
-          }px`,
+          `${targetWidth}px`,
 
         "--flying-card-height":
-          `${
-            flyingCard.targetHeight ??
-            138
-          }px`,
+          `${targetHeight}px`,
 
         /*
           着地後は盤面スロットの
-          中心座標へ直接置く。
+          左上座標へ直接配置する。
         */
         "--settled-left":
-          `${
-            flyingCard.targetLeft
-          }px`,
+          `${settledLeft}px`,
 
         "--settled-top":
-          `${
-            flyingCard.targetTop
-          }px`,
-
-        /*
-          実際に描画された盤面カードとの
-          差分を入れる。
-
-          初回描画時は0pxで、
-          useLayoutEffectで正確な値へ更新する。
-        */
-        "--settled-correction-x":
-          "0px",
-
-        "--settled-correction-y":
-          "0px",
+          `${settledTop}px`,
       }}
     >
       <img

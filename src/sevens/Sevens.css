@@ -888,8 +888,8 @@ body,
   top: var(--opening-start-top);
 
   /*
-  JSXから着地点の盤面スロット実寸を受け取る。
-  値がない場合だけ従来サイズを使う。
+    JSXから着地点の盤面スロット実寸を受け取る。
+    値がない場合だけ従来サイズを使う。
   */
   width:
     var(--flying-card-width, 92px);
@@ -911,14 +911,10 @@ body,
   animation: none;
 
   transform:
-    translate3d(
-      var(--settled-correction-x, 0px),
-      var(--settled-correction-y, 0px),
-      0
-    )
+    translate3d(0, 0, 0)
     translate3d(-50%, -50%, 0)
     rotate(0deg)
-    scale(1);
+    scale(0.8);
 
   will-change: transform, opacity;
 
@@ -936,6 +932,22 @@ body,
 
 /*
   着地後はアニメーションの移動量を使わず、
+  盤面カードの描画位置へ直接固定する。
+*/
+.openingFlyingCard.settledFlyingCard {
+  left: var(--settled-left);
+  top: var(--settled-top);
+
+  opacity: 1;
+
+  animation: none;
+  transform: none;
+
+  will-change: auto;
+}
+
+/*
+  着地後はアニメーションの移動量を使わず、
   盤面スロットの中心座標へ直接固定する。
 */
 .openingFlyingCard.settledFlyingCard {
@@ -948,7 +960,7 @@ body,
 
   transform:
     translate3d(-50%, -50%, 0)
-    rotate(0deg)
+    rotate(deg)
     scale(1);
 }
 
