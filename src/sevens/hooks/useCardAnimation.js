@@ -110,7 +110,7 @@ export default function useCardAnimation({
                     flyingCardId,
                 ),
             );
-          }, 80);
+          }, 200);
         });
       });
     }, 720);
