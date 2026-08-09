@@ -70,7 +70,7 @@ export default function useOpeningAnimation({
       着地した飛行カードを、
       その場に表示しておく時間。
     */
-    const landingHoldDuration = 500;
+    const landingHoldDuration = 100;
 
     orderedSevens.forEach(
       (card, index) => {
@@ -212,16 +212,42 @@ export default function useOpeningAnimation({
             });
 
             /*
-              盤面側の7を描画させるため、
-              2フレーム待つ。
+              空きスロットがPlayingCardへ
+              置き換わるまで2フレーム待つ。
             */
             window.requestAnimationFrame(
               () => {
                 window.requestAnimationFrame(
                   () => {
                     /*
-                      飛行処理は終了扱いにするが、
-                      表示は着地点に残す。
+                      設置後のPlayingCardから、
+                      実際の座標と寸法を
+                      もう一度取得する。
+                    */
+                    const settledTableElement =
+                      tableRef.current;
+
+                    const settledTargetElement =
+                      settledTableElement
+                        ?.querySelector(
+                          `[data-board-suit="${card.suit}"][data-board-rank="7"]`,
+                        );
+
+                    const settledTargetCenter =
+                      settledTableElement &&
+                      settledTargetElement
+                        ? getElementCenterRelative(
+                            settledTargetElement,
+                            settledTableElement,
+                          )
+                        : null;
+
+                    /*
+                      飛行処理は終了扱いにする。
+
+                      滞在中のカードは、
+                      設置後のPlayingCardの
+                      座標と寸法へ合わせる。
                     */
                     setFlyingCards(
                       (
@@ -235,6 +261,27 @@ export default function useOpeningAnimation({
                             flyingCardId
                               ? {
                                   ...flyingCard,
+
+                                  targetLeft:
+                                    settledTargetCenter
+                                      ?.left ??
+                                    flyingCard.targetLeft,
+
+                                  targetTop:
+                                    settledTargetCenter
+                                      ?.top ??
+                                    flyingCard.targetTop,
+
+                                  targetWidth:
+                                    settledTargetElement
+                                      ?.offsetWidth ??
+                                    flyingCard.targetWidth,
+
+                                  targetHeight:
+                                    settledTargetElement
+                                      ?.offsetHeight ??
+                                    flyingCard.targetHeight,
+
                                   settled:
                                     true,
                                 }
@@ -243,7 +290,7 @@ export default function useOpeningAnimation({
                     );
 
                     /*
-                      着地点で1秒静止してから、
+                      着地点で500ms静止してから、
                       この7の飛行カードだけ削除する。
 
                       openingDoneの変更後も削除処理を
@@ -304,7 +351,7 @@ export default function useOpeningAnimation({
                 ここではflyingCardsを
                 空にしない。
 
-                各7は着地から1秒後に
+                各7は着地から500ms後に
                 個別に削除される。
               */
               setCurrentPlayerIndex(
