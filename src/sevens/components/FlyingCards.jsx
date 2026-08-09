@@ -109,6 +109,12 @@ const FlyingCard = memo(function FlyingCard({
 
         "--opening-start-top":
           sourcePosition?.top ?? "50%",
+
+        "--flying-card-width":
+          `${flyingCard.targetWidth ?? 92}px`,
+
+        "--flying-card-height":
+          `${flyingCard.targetHeight ?? 138}px`,
       }}
     >
       <img

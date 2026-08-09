@@ -171,6 +171,10 @@ export default function useOpeningAnimation({
                     targetCenter.left,
                   targetTop:
                     targetCenter.top,
+                  targetWidth:
+                    targetElement.offsetWidth,
+                  targetHeight:
+                    targetElement.offsetHeight,
                   settled: false,
                 },
               ],
